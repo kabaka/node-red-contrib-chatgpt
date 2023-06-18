@@ -14,6 +14,7 @@ Supercharge your Node-RED flows with AI! Seamlessly integrate with OpenAI's powe
   - [Getting Started](#getting-started)
   - [Setup](#setup)
   - [Usage](#usage)
+    - [Parameter Examples](#parameter-examples)
     - [Additional optional properties](#additional-optional-properties)
   - [Examples](#examples)
   - [External Links](#external-links)
@@ -42,39 +43,61 @@ With `node-red-contrib-custom-chatgpt`, you have the power to select the behavio
 
 For detailed information on the usage of these modes, please refer to the [OpenAI API documentation](https://beta.openai.com/docs/).
 
-1. When `msg.topic` is set to `completion`:
+| `msg.topic`   | Required Parameters | Optional Parameters |
+| ------------ | -------------------- | -------------------- |
+| `completion` | `msg.payload`: A thoughtfully composed prompt supplying adequate detail for the model. | N/A |
+| `image`      | `msg.payload`: A descriptive text prompt articulating the desired image. | `msg.size`: A string indicating the desired image dimensions. [Default:`256x256`] <br> `msg.format`: A string—either `b64_json` or `url`. [Default:`b64_json`] |
+| `edit`       | `msg.payload`: A text prompt serving as a starting point for the edit. <br> `msg.last`: A string providing the text input that is to be edited. | N/A |
+| `turbo`      | `msg.payload`: A well-constructed prompt supplying sufficient detail for the model. | `msg.history`: An array of objects encapsulating the conversation history. [Default:`[]`] |
+| `gpt4`       | `msg.payload`: A thoroughly prepared prompt offering enough context for the model. | `msg.history`: An array of objects recording the conversation history. [Default:`[]`] <br> `msg.functions`: An array of objects dictating function behaviors for the model. Each object must contain a `name` and `behavior` attribute. [Default:`[]`] <br> `msg.function_call`: A string or object regulating the model's responses to function calls. [Default:`none` if no functions, `auto` if functions are present] |
 
-   - [Required] `msg.payload` should be a well-written prompt that provides enough information for the model to know what you want and how it should respond. Its success generally depends on the complexity of the task and quality of your prompt. A good rule of thumb is to think about how you would write a word problem for a middle schooler to solve.
+### Parameter Examples
 
-2. When `msg.topic` is set to `image`:
+- `completion`:
 
-   - [Required] `msg.payload` should be a prompt of text description of the desired image.
+```javascript
+msg.topic = "completion";
+msg.payload = "Write a brief summary of the book 'To Kill a Mockingbird'.";
+return msg;
+```
 
-   - [Optional] `msg.size` should be a string of the desired image dimensions. [Default:`256x256`]
+- `image`:
 
-   - [Optional] `msg.format` should be a string of either `b64_json` or `url`. [Default:`b64_json`]
+```javascript
+msg.topic = "image";
+msg.payload = "Generate an image of a sunny beach.";
+msg.size = "512x512";
+msg.format = "url";
+return msg;
+```
 
-3. When `msg.topic` is set to `edit`:
+- `edit`:
 
-   - [Required] `msg.payload` should be a prompt of text to use as a starting point for the edit.
+```javascript
+msg.topic = "edit";
+msg.payload = "Fix the spelling mistakes";
+msg.last = "The quick fox jumps over the lazzy dog.";
+return msg;
+```
 
-   - [Required] `msg.last` should be a string of text to use as the input to be edited.
+- `turbo`:
 
-4. When `msg.topic` is set to `turbo`:
+```javascript
+msg.topic = "turbo";
+msg.payload = "Translate the following English text to French: 'Hello, how are you?'";
+msg.history = [];
+return msg;
+```
 
-   - [Required] `msg.payload` should be a well-written prompt that provides enough information for the model to know what you want and how it should respond. Its success generally depends on the complexity of the task and quality of your prompt.
+- `gpt4`:
 
-   - [Optional] `msg.history` should be an array of objects containing the conversation history. [Default:`[]`]
-
-5. When `msg.topic` is set to `gpt4`:
-
-   - [Required] `msg.payload` should be a well-written prompt that provides enough information for the model to know what you want and how it should respond. Its success generally depends on the complexity of the task and quality of your prompt.
-
-   - [Optional] `msg.history` should be an array of objects containing the conversation history. [Default:`[]`]
-
-   - [Optional] `msg.functions` should be an array of objects defining function behaviors for the model. Each object must contain a `name` and `behavior` property. [Default:`[]`]
-
-   - [Optional] `msg.function_call` should be a string or object that controls how the model responds to function calls. "none" means the model does not call a function and responds to the end-user. "auto" allows the model to decide. Specifying a particular function via `{"name":"my_function"}` forces the model to call that function. [Default:`none` if no functions, `auto` if functions are present]
+```javascript
+msg.topic = "gpt4";
+msg.payload = "Write a poem about the sunrise.";
+msg.history = [];
+msg.functions = [];
+return msg;
+```
 
 ### Additional optional properties
 
