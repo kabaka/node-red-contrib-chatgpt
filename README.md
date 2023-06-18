@@ -58,6 +58,9 @@ Once set-up the node can be controlled with as little as a single required messa
 
    - [Optional] `msg.history` should be an array of objects containing the conversation history. [Default:`[]`]
 
+   - [Optional] `msg.functions` should be an array of objects defining function behaviors for the model. Each object must contain a `name` and `behavior` property. [Default:`[]`]
+
+   - [Optional] `msg.function_call` should be a string or object that controls how the model responds to function calls. "none" means the model does not call a function and responds to the end-user. "auto" allows the model to decide. Specifying a particular function via `{"name":"my_function"}` forces the model to call that function. [Default:`none` if no functions, `auto` if functions are present]
 
 #### Additional optional properties:
 
