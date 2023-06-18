@@ -57,29 +57,66 @@
     </div>
 </script>
 
-<script type="text/html" data-help-name="node-red-contrib-custom-chatgpt">
+<script type="text/html" data-help-name="chatgpt">
     <p>Configures the behavior of the node by setting the Topic property value to <code>completion</code>, <code>image</code>, <code>edit</code>, <code>turbo</code>, or <code>gpt4</code>. The node is controlled with a single required message property <code>msg.payload</code> or dynamically set with incoming messages using <code>read from msg.topic</code>.</p>
 
     <p>For detailed information on the usage of these modes, please refer to the <a href="https://platform.openai.com/docs/api-reference">OpenAI API documentation</a>.</p>
+
+    <h3>Setup</h3>
+
+    <dl class="message-properties">
+        <dt>OPENAI_API_KEY<span class="property-type">string</span></dt>
+        <dd>
+            This key is used to authenticate your requests to the ChatGPT API. To get your <code>OPENAI_API_KEY</code>, log in to <a href="https://chat.openai.com/chat">ChatGPT</a>, then visit <a href="https://platform.openai.com/account/api-keys">https://platform.openai.com/account/api-keys</a>, click "+ Create new secret key", and paste the "API key" into this property value.
+        </dd>
+        <dt>Organization<span class="property-type">string</span></dt>
+        <dd>
+            This identifier links your requests to your OpenAI organization. To get your <code>Organization</code>, visit <a href="https://platform.openai.com/account/org-settings">https://platform.openai.com/account/org-settings</a> and paste the "OrganizationID" into this property value.
+        </dd>
+        <dt class="optional">BaseUrl<span class="property-type">string</span></dt>
+        <dd>
+            If you can't directly access <a href="https://api.openai.com">https://api.openai.com</a> due to network restrictions, you can set up an API proxy (like Cloudflare WARP) and set your service's URL as the BaseUrl property value.
+        </dd>
+    </dl>
+
 
     <h3>Completion</h3>
 
     <p>The <b>Completion</b> mode is used to generate text that continues from a given prompt. The AI model builds upon the prompt to generate creative, contextually appropriate text. This mode is ideal for a range of applications, such as drafting emails, writing essays, creating poetry, or even generating code. The quality of the result often depends on how well the prompt is crafted. It's recommended to provide as much detail in the prompt as possible to guide the model's output.</p>
 
+    <h4>Inputs</h4>
+
     <dl class="message-properties">
+
         <dt><code>msg.topic</code><span class="property-type">string</span></dt>
         <dd>"completion"</dd>
+
         <dt><code>msg.payload</code><span class="property-type">string</span></dt>
         <dd>A thoughtfully composed prompt supplying adequate detail for the model.</dd>
+    </dl>
+
+    <h4>Outputs</h4>
+
+    <dl class="message-properties">
+
+        <dt>msg.payload <span class="property-type">string</span></dt>
+        <dd>A generated continuation of the input prompt according to the model's training.</dd>
+
+        <dt>msg.full <span class="property-type">object</span></dt>
+        <dd>The complete response object, including details about the model's execution and choices.</dd>
     </dl>
 
     <h3>Image</h3>
 
     <p>The <b>Image</b> mode allows you to generate images from text prompts. Given a descriptive text, the AI model generates an image that matches the description. This could range from simple objects to more complex scenes. The size and format of the generated image can be customized according to your needs. The more descriptive and specific your prompt, the more accurate the resulting image will be.</p>
 
+    <h4>Inputs</h4>
+
     <dl class="message-properties">
+
         <dt><code>msg.topic</code><span class="property-type">string</span></dt>
         <dd>"image"</dd>
+
         <dt><code>msg.payload</code><span class="property-type">string</span></dt>
         <dd>A descriptive text prompt articulating the desired image.</dd>
         <dt class="optional"><code>msg.size</code><span class="property-type">string</span></dt>
@@ -88,47 +125,112 @@
         <dd>A string—either "b64_json" or "url". Default: "b64_json".</dd>
     </dl>
 
+    <h4>Outputs</h4>
+
+    <dl class="message-properties">
+
+        <dt>msg.payload <span class="property-type">string/b64_json/url</span></dt>
+        <dd>An image representation generated from the input text prompt.</dd>
+
+        <dt>msg.full <span class="property-type">object</span></dt>
+        <dd>The complete response object, including the raw image data and model metadata.</dd>
+    </dl>
+
     <h3>Edit</h3>
 
     <p>The <b>Edit</b> mode is designed for text editing tasks. Provide an original piece of text with the prompt describing the desired changes, and the model will output an edited version of the original text. This is useful for tasks such as proofreading, text correction, and rephrasing. Be specific in your prompt about the type of editing you want the model to perform.</p>
 
+    <h4>Inputs</h4>
+
     <dl class="message-properties">
+
         <dt><code>msg.topic</code><span class="property-type">string</span></dt>
         <dd>"edit"</dd>
+
         <dt><code>msg.payload</code><span class="property-type">string</span></dt>
         <dd>A text prompt serving as a starting point for the edit.</dd>
+
         <dt><code>msg.last</code><span class="property-type">string</span></dt>
         <dd>A string providing the text input that is to be edited.</dd>
+    </dl>
+
+    <h4>Outputs</h4>
+
+    <dl class="message-properties">
+
+        <dt>msg.payload <span class="property-type">string</span></dt>
+        <dd>The edited version of the input text, according to the model's understanding of correct syntax and grammar.</dd>
+
+        <dt>msg.full <span class="property-type">object</span></dt>
+        <dd>The complete response object, including the raw edited text and model metadata.</dd>
     </dl>
 
     <h3>Turbo</h3>
 
     <p>The <b>Turbo</b> mode is optimized for speed and efficiency, making it ideal for real-time, interactive applications like drafting emails or conversational agents. This mode also supports maintaining a history of the conversation which the model can use for context to generate better responses. Clear and concise prompts will result in faster and more focused responses.</p>
 
+    <h4>Inputs</h4>
+
     <dl class="message-properties">
+
         <dt><code>msg.topic</code><span class="property-type">string</span></dt>
         <dd>"turbo"</dd>
+
         <dt><code>msg.payload</code><span class="property-type">string</span></dt>
         <dd>A well-constructed prompt supplying sufficient detail for the model.</dd>
+
         <dt class="optional"><code>msg.history</code><span class="property-type">array</span></dt>
         <dd>An array of objects encapsulating the conversation history. Default: [].</dd>
+    </dl>
+
+    <h4>Outputs</h4>
+
+    <dl class="message-properties">
+
+        <dt>msg.payload <span class="property-type">string</span></dt>
+        <dd>A more advanced and nuanced response to the input prompt, allowing for more complex interactions.</dd>
+
+        <dt>msg.history <span class="property-type">array</span></dt>
+        <dd>An array recording the conversation history with each message object containing the role ('system', 'user', or 'assistant') and the content of the message.</dd>
+
+        <dt>msg.full <span class="property-type">object</span></dt>
+        <dd>The complete response object, including details about the model's execution and conversation history.</dd>
     </dl>
 
     <h3>GPT-4</h3>
 
     <p>The <b>GPT-4</b> mode makes use of the advanced features of the GPT-4 model, including support for conversation history and the ability to define function behaviors. This mode allows for complex interactions where the model can understand and respond to function calls in a conversational context. It's important to properly configure the functions and function_call parameters to get the most out of this mode.</p>
 
+    <h4>Inputs</h4>
+
     <dl class="message-properties">
         <dt><code>msg.topic</code><span class="property-type">string</span></dt>
         <dd>"gpt4"</dd>
+
         <dt><code>msg.payload</code><span class="property-type">string</span></dt>
         <dd>A thoroughly prepared prompt offering enough context for the model.</dd>
+
         <dt class="optional"><code>msg.history</code><span class="property-type">array</span></dt>
         <dd>An array of objects recording the conversation history. Default: [].</dd>
+
         <dt class="optional"><code>msg.functions</code><span class="property-type">array</span></dt>
         <dd>An array of objects dictating function behaviors for the model. Each object must contain a <code>name</code> and <code>behavior</code> attribute. Default: [].</dd>
+
         <dt class="optional"><code>msg.function_call</code><span class="property-type">string or object</span></dt>
         <dd>A string or object regulating the model's responses to function calls. Default: <code>none</code> if no functions, <code>auto</code> if functions are present.</dd>
+    </dl>
+
+    <h4>Outputs</h4>
+
+    <dl class="message-properties">
+        <dt>msg.payload <span class="property-type">string</span></dt>
+        <dd>An advanced response to the input prompt, accommodating additional function behavior and control parameters.</dd>
+
+        <dt>msg.history <span class="property-type">array</span></dt>
+        <dd>An array recording the conversation history with each message object containing the role ('system', 'user', 'assistant', or 'function') and the content of the message.</dd>
+
+        <dt>msg.full <span class="property-type">object</span></dt>
+        <dd>The complete response object, including details about the model's execution, conversation history, and function behaviors.</dd>
     </dl>
 
     <h3>Additional optional properties</h3>
