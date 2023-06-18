@@ -1,5 +1,6 @@
+const { Configuration, OpenAIApi } = require("openai");
+
 module.exports = (RED) => {
-    const { Configuration, OpenAIApi } = require("openai");
     const ACCEPT_TOPIC_LIST = [
         "completion",
         "image",
@@ -7,15 +8,16 @@ module.exports = (RED) => {
         "turbo",
         "gpt4",
     ].map((item) => item.toLowerCase());
-    const main = function (config) {
-        const node = this;
-        RED.nodes.createNode(node, config);
+
+    // Factory method to create openai instance
+    function createOpenAIInstance(config) {
         const API_KEY = config.API_KEY;
         const ORGANIZATION = config.Organization;
         const configuration = new Configuration({
             organization: ORGANIZATION,
             apiKey: API_KEY,
         });
+
         if (config.BaseUrl) {
             try {
                 const url = new URL(config.BaseUrl);
@@ -31,7 +33,30 @@ module.exports = (RED) => {
                 });
             }
         }
-        const openai = new OpenAIApi(configuration);
+
+        return new OpenAIApi(configuration);
+    }
+
+    // Error handling function
+    function handleError(error, msg, node) {
+        node.status({
+            fill: "red",
+            shape: "dot",
+            text: "Error",
+        });
+        if (error.response) {
+            node.error(error.response.status, msg);
+            node.error(error.response.data, msg);
+        } else {
+            node.error(error.message, msg);
+        }
+    }
+
+    // Main functionality
+    function main(config) {
+        const node = this;
+        RED.nodes.createNode(node, config);
+        const openai = createOpenAIInstance(config);
 
         node.on("input", async (msg) => {
             node.status({
@@ -60,7 +85,8 @@ module.exports = (RED) => {
                     ).join(", ")}`
                 );
                 node.send(msg);
-            } else if (msg.topic === "image") {
+            }
+            if (msg.topic === "image") {
                 try {
                     const response = await openai.createImage({
                         prompt: msg.payload,
@@ -82,17 +108,7 @@ module.exports = (RED) => {
                     });
                     node.send(msg);
                 } catch (error) {
-                    node.status({
-                        fill: "red",
-                        shape: "dot",
-                        text: "Error",
-                    });
-                    if (error.response) {
-                        node.error(error.response.status, msg);
-                        node.error(error.response.data, msg);
-                    } else {
-                        node.error(error.message, msg);
-                    }
+                    handleError(error, msg, node);
                 }
             } else if (msg.topic === "edit") {
                 try {
@@ -113,17 +129,7 @@ module.exports = (RED) => {
                     });
                     node.send(msg);
                 } catch (error) {
-                    node.status({
-                        fill: "red",
-                        shape: "dot",
-                        text: "Error",
-                    });
-                    if (error.response) {
-                        node.error(error.response.status, msg);
-                        node.error(error.response.data, msg);
-                    } else {
-                        node.error(error.message, msg);
-                    }
+                    handleError(error, msg, node);
                 }
             } else if (msg.topic === "turbo") {
                 try {
@@ -162,17 +168,7 @@ module.exports = (RED) => {
                     });
                     node.send(msg);
                 } catch (error) {
-                    node.status({
-                        fill: "red",
-                        shape: "dot",
-                        text: "Error",
-                    });
-                    if (error.response) {
-                        node.error(error.response.status, msg);
-                        node.error(error.response.data, msg);
-                    } else {
-                        node.error(error.message, msg);
-                    }
+                    handleError(error, msg, node);
                 }
             } else if (msg.topic === "gpt4") {
                 try {
@@ -223,17 +219,7 @@ module.exports = (RED) => {
                     });
                     node.send(msg);
                 } catch (error) {
-                    node.status({
-                        fill: "red",
-                        shape: "dot",
-                        text: "Error",
-                    });
-                    if (error.response) {
-                        node.error(error.response.status, msg);
-                        node.error(error.response.data, msg);
-                    } else {
-                        node.error(error.message, msg);
-                    }
+                    handleError(error, msg, node);
                 }
             } else {
                 try {
@@ -263,21 +249,12 @@ module.exports = (RED) => {
                     });
                     node.send(msg);
                 } catch (error) {
-                    node.status({
-                        fill: "red",
-                        shape: "dot",
-                        text: "Error",
-                    });
-                    if (error.response) {
-                        node.error(error.response.status, msg);
-                        node.error(error.response.data, msg);
-                    } else {
-                        node.error(error.message, msg);
-                    }
+                    handleError(error, msg, node);
                 }
             }
         });
-        // clear the node status(invalid option tips)
+
+        // Clear the node status (invalid option tips)
         node.on("close", () => {
             node.status({});
         });
