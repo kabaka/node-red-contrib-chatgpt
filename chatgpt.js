@@ -194,6 +194,8 @@ module.exports = (RED) => {
                         max_tokens: parseInt(msg.max_tokens) || 4000,
                         presence_penalty: parseInt(msg.presence_penalty) || 0,
                         frequency_penalty: parseInt(msg.frequency_penalty) || 0,
+                        functions: msg.functions || null,
+                        function_call: msg.function_call || "auto",
                     });
                     const trimmedContent =
                         response.data.choices[0].message.content.trim();
