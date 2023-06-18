@@ -74,17 +74,8 @@ module.exports = (RED) => {
                     content: msg.payload,
                 };
                 msg.history.push(input);
-                let function_call;
-                if (msg.function_call) {
-                    function_call = msg.function_call;
-                } else {
-                    if (msg.functions && msg.functions.length > 0) {
-                        function_call = 'auto';
-                    } else {
-                        function_call = 'none';
-                    }
-                }
-                return openai.createChatCompletion({
+
+                const params = {
                     model: 'gpt-4-0613',
                     messages: msg.history,
                     temperature: parseInt(msg.temperature) || 1,
@@ -95,9 +86,14 @@ module.exports = (RED) => {
                     max_tokens: parseInt(msg.max_tokens) || 4000,
                     presence_penalty: parseInt(msg.presence_penalty) || 0,
                     frequency_penalty: parseInt(msg.frequency_penalty) || 0,
-                    functions: msg.functions || [],
-                    function_call,
-                });
+                };
+
+                if (msg.functions && msg.functions.length > 0) {
+                    params.functions = msg.functions;
+                    params.function_call = msg.function_call ?? 'auto';
+                }
+
+                return openai.createChatCompletion(params);
             },
             transform: (msg, response) => {
                 const trimmedContent = response.data.choices[0].message.content.trim();
