@@ -85,7 +85,7 @@ module.exports = (RED) => {
                     }
                 }
                 return openai.createChatCompletion({
-                    model: 'gpt-4',
+                    model: 'gpt-4-0613',
                     messages: msg.history,
                     temperature: parseInt(msg.temperature) || 1,
                     top_p: parseInt(msg.top_p) || 1,
