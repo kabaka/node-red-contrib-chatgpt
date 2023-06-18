@@ -96,14 +96,27 @@ module.exports = (RED) => {
                 return openai.createChatCompletion(params);
             },
             transform: (msg, response) => {
-                const trimmedContent = response.data.choices[0].message.content.trim();
-                const result = {
-                    role: 'assistant',
-                    content: trimmedContent,
-                };
-                msg.history.push(result);
-                msg.payload = response.data.choices[0].message.content;
-                msg.full = response;
+                if(response.data.choices[0].message.content !== null) {
+                    const trimmedContent = response.data.choices[0].message.content.trim();
+                    const result = {
+                        role: 'assistant',
+                        content: trimmedContent,
+                    };
+                    msg.history.push(result);
+                    msg.payload = response.data.choices[0].message.content;
+                    msg.full = response;
+                } else {
+                    // The content is null, indicating that a function call is necessary
+                    msg.function_call = response.data.choices[0].message.function_call;
+                    const result = {
+                        role: 'assistant',
+                        content: null,
+                        function_call: msg.function_call
+                    };
+                    msg.history.push(result);
+                    msg.payload = null;
+                    msg.full = response;
+                }
             }
         },
         'completion': {
