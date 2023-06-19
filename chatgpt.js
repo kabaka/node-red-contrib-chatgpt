@@ -69,11 +69,16 @@ module.exports = (RED) => {
         'gpt4': {
             func: (openai, msg) => {
                 if (typeof msg.history === 'undefined') msg.history = [];
-                const input = {
-                    role: 'user',
-                    content: msg.payload,
-                };
-                msg.history.push(input);
+
+                // Payload is optional. If it is omitted, assume the caller has
+                // modified history on their own.
+                if (msg.payload) {
+                    const input = {
+                        role: 'user',
+                        content: msg.payload,
+                    };
+                    msg.history.push(input);
+                }
 
                 const params = {
                     model: 'gpt-4-0613',
