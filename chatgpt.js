@@ -113,12 +113,19 @@ module.exports = (RED) => {
                 } else {
                     // The content is null, indicating that a function call is necessary
                     msg.function_call = response.data.choices[0].message.function_call;
+                    const args = msg.function_call.arguments;
+
+                    //  if arguments is not a string, json stringify it
+                    if (typeof args !== 'string') {
+                        args = JSON.stringify(args);
+                    }
+
                     const result = {
                         role: 'assistant',
                         content: null,
                         function_call: {
                             name: msg.function_call.name,
-                            arguments: JSON.stringify(msg.function_call.arguments)
+                            arguments: args
                         }
                     };
                     msg.history.push(result);
