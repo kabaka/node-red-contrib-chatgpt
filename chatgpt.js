@@ -111,7 +111,10 @@ module.exports = (RED) => {
                     const result = {
                         role: 'assistant',
                         content: null,
-                        function_call: msg.function_call
+                        function_call: {
+                            name: msg.function_call.name,
+                            arguments: JSON.stringify(msg.function_call.arguments)
+                        }
                     };
                     msg.history.push(result);
                     msg.payload = null;
