@@ -155,6 +155,24 @@ module.exports = (RED) => {
                 msg.payload = response.data.choices[0].text;
                 msg.full = response;
             }
+        },
+        'whisper': {
+            func: (openai, msg) => {
+                const params = {
+                    file: fs.createReadStream(msg.payload), // assuming msg.payload is the path to the MP3 file
+                    model: 'whisper-1',
+                    prompt: msg.prompt || null,
+                    response_format: msg.response_format || 'json',
+                    temperature: msg.temperature || 0,
+                    language: msg.language || null,
+                };
+
+                return openai.createTranscription(params);
+            },
+            transform: (msg, response) => {
+                msg.payload = response.data.text; // the transcribed text
+                msg.full = response;
+            }
         }
     };
 
