@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { Configuration, OpenAIApi } = require("openai");
 
 module.exports = (RED) => {
@@ -101,7 +102,7 @@ module.exports = (RED) => {
                 return openai.createChatCompletion(params);
             },
             transform: (msg, response) => {
-                if(response.data.choices[0].message.content !== null) {
+                if (response.data.choices[0].message.content !== null) {
                     const trimmedContent = response.data.choices[0].message.content.trim();
                     const result = {
                         role: 'assistant',
@@ -157,17 +158,15 @@ module.exports = (RED) => {
             }
         },
         'whisper': {
-            func: (openai, msg) => {
-                const params = {
-                    file: fs.createReadStream(msg.payload), // assuming msg.payload is the path to the MP3 file
-                    model: 'whisper-1',
-                    prompt: msg.prompt || null,
-                    response_format: msg.response_format || 'json',
-                    temperature: msg.temperature || 0,
-                    language: msg.language || null,
-                };
+            func: async (openai, msg) => {
+                const file = new File([fs.readFileSync(msg.payload)], 'transcription.mp3', { type: 'audio/mpeg' }); // assuming msg.payload is the path to the MP3 file
+                const model = 'whisper-1';
+                const prompt = msg.prompt || null; // additional text prompt if needed
+                const responseFormat = msg.response_format || 'json'; // default format
+                const temperature = msg.temperature || 0; // default temperature
+                const language = msg.language || null; // if a language code is supplied
 
-                return openai.createTranscription(params);
+                return await openai.createTranscription(file, model, prompt, responseFormat, temperature, language);
             },
             transform: (msg, response) => {
                 msg.payload = response.data.text; // the transcribed text
