@@ -248,6 +248,9 @@ module.exports = (RED) => {
                 node.send(msg);
             } catch (error) {
                 handleError(error, msg, node);
+
+                msg.payload = error;
+                node.send(msg);
             }
         });
 
