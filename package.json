@@ -50,6 +50,6 @@
   },
   "homepage": "https://github.com/HaroldPetersInskipp/node-red-contrib-chatgpt#readme",
   "dependencies": {
-    "openai": "^3.2.1"
+    "openai": "^4.10.0"
   }
 }
